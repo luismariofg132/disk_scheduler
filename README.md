@@ -97,6 +97,34 @@ Para exportar sin pregunta interactiva:
 python main.py --example --no-plots --export both
 ```
 
+## Ejecución con interfaz gráfica
+
+```bash
+streamlit run app.py
+```
+
+Si Windows no reconoce el comando `streamlit`, usa:
+
+```bash
+python -m streamlit run app.py
+```
+
+La interfaz web permite ingresar el tamaño del disco, la posición inicial del
+cabezal, la lista de solicitudes y la dirección inicial para SCAN/C-SCAN.
+Después de presionar **Ejecutar simulación**, muestra la tabla comparativa,
+indica automáticamente el algoritmo más eficiente y permite elegir una sola
+gráfica a la vez:
+
+- FCFS
+- SSTF
+- SCAN
+- C-SCAN
+- Comparación general
+- Barras: distancia total
+- Barras: tiempo promedio
+
+También incluye botones para descargar los resultados en CSV y JSON.
+
 ## Ejemplo de entrada
 
 ```text
