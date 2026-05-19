@@ -125,6 +125,51 @@ gráfica a la vez:
 
 También incluye botones para descargar los resultados en CSV y JSON.
 
+## Modo comparacion de escenarios
+
+La interfaz Streamlit incluye un selector principal llamado **Modo de simulacion**.
+Desde alli se puede elegir:
+
+- **Simulacion individual:** conserva el flujo normal para un solo conjunto de solicitudes.
+- **Comparacion de escenarios:** ejecuta FCFS, SSTF, SCAN y C-SCAN sobre varios casos predefinidos.
+
+Para usarlo:
+
+```bash
+python -m streamlit run app.py
+```
+
+Luego selecciona **Comparacion de escenarios**, marca los escenarios que quieres evaluar y presiona **Comparar escenarios**.
+
+Escenarios incluidos:
+
+- **Caso clasico:** escenario de referencia para validar resultados.
+- **Solicitudes agrupadas cerca del cabezal:** muestra el efecto de alta localidad espacial.
+- **Solicitudes dispersas:** evidencia el costo de mover el cabezal entre cilindros alejados.
+- **Cabezal cerca del extremo izquierdo:** analiza el efecto de iniciar cerca de un borde del disco.
+- **Cabezal cerca del extremo derecho:** analiza el inicio cerca del extremo superior del disco.
+- **Solicitudes cargadas hacia un solo lado:** muestra si los algoritmos aprovechan solicitudes en una misma direccion.
+
+El modo muestra dos tablas:
+
+- Una tabla completa con escenario, algoritmo, distancia total, tiempo promedio y secuencia.
+- Una tabla resumida con el mejor algoritmo por escenario.
+
+Tambien permite descargar los resultados como:
+
+```text
+scenario_comparison_results.csv
+scenario_comparison_results.json
+```
+
+Graficas disponibles:
+
+- **Distancia total por escenario:** compara el seek time acumulado de cada algoritmo.
+- **Tiempo promedio por escenario:** compara la distancia promedio recorrida por solicitud.
+- **Ganadores por escenario:** resume cuantas veces cada algoritmo obtuvo la menor distancia total.
+
+Este modo es util para una exposicion porque muestra que el rendimiento no depende solo del algoritmo, sino tambien del patron de solicitudes, la posicion inicial del cabezal y la direccion inicial del movimiento.
+
 ## Ejemplo de entrada
 
 ```text
