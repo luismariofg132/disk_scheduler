@@ -1,8 +1,15 @@
-"""Escenarios predefinidos para comparar algoritmos de planificacion."""
+"""Escenarios predefinidos para comparar algoritmos de planificacion.
+Cada escenario contiene:
+- Tamaño del disco.
+- Posición inicial del cabezal.
+- Solicitudes.
+- Dirección inicial.
+- Descripción del caso."""
 
+# IMPORTACIONES
 from typing import Dict, List, TypedDict
 
-
+# ESTRUCTURA DE ESCENARIO
 class Scenario(TypedDict):
     """Datos necesarios para ejecutar un escenario de simulacion."""
 
@@ -12,10 +19,11 @@ class Scenario(TypedDict):
     direction: str
     description: str
 
-
+# ESCENARIOS PREDEFINIDOS
 def get_predefined_scenarios() -> Dict[str, Scenario]:
     """Retorna escenarios representativos para comparacion academica."""
     return {
+        # Caso clásico usado frecuentemente en ejemplos académicos
         "Caso clasico": {
             "disk_size": 200,
             "head": 53,
@@ -23,6 +31,7 @@ def get_predefined_scenarios() -> Dict[str, Scenario]:
             "direction": "right",
             "description": "Escenario de referencia para validar resultados.",
         },
+         # Solicitudes cercanas entre sí
         "Solicitudes agrupadas cerca del cabezal": {
             "disk_size": 200,
             "head": 100,
@@ -30,6 +39,7 @@ def get_predefined_scenarios() -> Dict[str, Scenario]:
             "direction": "right",
             "description": "Muestra el comportamiento cuando hay alta localidad espacial.",
         },
+        # Solicitudes muy separadas
         "Solicitudes dispersas": {
             "disk_size": 200,
             "head": 50,
@@ -37,6 +47,7 @@ def get_predefined_scenarios() -> Dict[str, Scenario]:
             "direction": "right",
             "description": "Evidencia el costo de mover el cabezal entre cilindros alejados.",
         },
+        # Cabezal cerca del inicio del disco
         "Cabezal cerca del extremo izquierdo": {
             "disk_size": 200,
             "head": 10,
@@ -44,6 +55,7 @@ def get_predefined_scenarios() -> Dict[str, Scenario]:
             "direction": "right",
             "description": "Permite analizar el efecto de iniciar cerca de un borde del disco.",
         },
+        # Cabezal cerca del final del disco
         "Cabezal cerca del extremo derecho": {
             "disk_size": 200,
             "head": 185,
@@ -51,6 +63,7 @@ def get_predefined_scenarios() -> Dict[str, Scenario]:
             "direction": "left",
             "description": "Permite analizar el inicio cerca del extremo superior del disco.",
         },
+        # Todas las solicitudes en una misma dirección
         "Solicitudes cargadas hacia un solo lado": {
             "disk_size": 200,
             "head": 40,
