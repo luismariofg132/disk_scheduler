@@ -1,5 +1,13 @@
-"""Interfaz web con Streamlit para el simulador de planificacion de disco."""
+"""Interfaz web con Streamlit para el simulador de planificacion de disco.
 
+La aplicación permite:
+- Ejecutar simulaciones individuales.
+- Comparar escenarios predefinidos.
+- Visualizar gráficas.
+- Descargar resultados en CSV y JSON.
+"""
+
+# IMPORTACIONES
 import csv
 import io
 import json
@@ -9,9 +17,16 @@ from typing import Any, List
 import matplotlib.pyplot as plt
 import streamlit as st
 
+# Algoritmos y validaciones
 from algorithms import DiskResult, c_scan, fcfs, scan, sstf, validate_disk_input
+
+# Conversión de solicitudes
 from main import parse_requests
+
+# Escenarios predefinidos
 from scenarios import Scenario, get_predefined_scenarios
+
+# Funciones de visualización
 from visualization import (
     plot_algorithm_wins,
     plot_average_time_bars,
@@ -22,10 +37,10 @@ from visualization import (
     plot_total_distance_bars,
 )
 
-
+# Tipo auxiliar para resultados de escenarios
 ScenarioResult = dict[str, Any]
 
-
+# SIMULACIÓN
 def run_simulation(
     requests: List[int],
     head: int,
@@ -46,7 +61,7 @@ def get_best_algorithm(results: List[DiskResult]) -> DiskResult:
     """Retorna el resultado con menor distancia total recorrida."""
     return min(results, key=lambda result: result["total_distance"])
 
-
+# CONVERSIÓN DE RESULTADOS
 def results_to_rows(results: List[DiskResult]) -> List[dict[str, object]]:
     """Convierte los resultados individuales a filas de tabla."""
     return [
@@ -79,6 +94,7 @@ def results_to_json(results: List[DiskResult]) -> str:
     return json.dumps(results, indent=4, ensure_ascii=False)
 
 
+# VISUALIZACIONES
 def select_individual_figure(option: str, results: List[DiskResult]):
     """Selecciona y crea la figura de simulacion individual."""
     result_by_name = {result["algorithm"]: result for result in results}
@@ -92,6 +108,7 @@ def select_individual_figure(option: str, results: List[DiskResult]):
     return plot_average_time_bars(results)
 
 
+# ESCENARIOS
 def run_scenario_comparison(selected_scenarios: List[str]) -> tuple[List[ScenarioResult], List[dict[str, object]]]:
     """Ejecuta todos los algoritmos para los escenarios seleccionados."""
     scenarios = get_predefined_scenarios()
@@ -107,6 +124,8 @@ def run_scenario_comparison(selected_scenarios: List[str]) -> tuple[List[Scenari
             scenario["direction"],
         )
         best = get_best_algorithm(results)
+        
+        # Guarda ganador del escenario
         winners.append(
             {
                 "Escenario": scenario_name,
@@ -116,6 +135,8 @@ def run_scenario_comparison(selected_scenarios: List[str]) -> tuple[List[Scenari
             }
         )
 
+        
+        # Guarda resultados completos
         for result in results:
             scenario_results.append(
                 {
@@ -148,7 +169,7 @@ def scenario_results_to_json(scenario_results: List[ScenarioResult]) -> str:
     """Convierte resultados de escenarios a JSON en memoria."""
     return json.dumps(scenario_results, indent=4, ensure_ascii=False)
 
-
+# ANÁLISIS AUTOMÁTICO
 def build_scenario_analysis(winners: List[dict[str, object]]) -> str:
     """Genera una explicacion automatica sobre el algoritmo que mas gana."""
     if not winners:
@@ -208,6 +229,7 @@ def scenario_visual_explanation(option: str) -> str:
     return explanations[option]
 
 
+# MODO INDIVIDUAL
 def render_individual_mode(
     run_button: bool,
     disk_size: int,
@@ -220,6 +242,7 @@ def render_individual_mode(
         st.info("Ingresa los datos y presiona Ejecutar simulacion.")
         return
 
+    # Ejecuta simulación
     if run_button:
         try:
             requests = parse_requests(raw_requests)
@@ -236,13 +259,17 @@ def render_individual_mode(
     results = st.session_state["individual_results"]
     best = get_best_algorithm(results)
 
+    # Tabla de resultados
     st.subheader("Tabla comparativa")
     st.dataframe(results_to_rows(results), use_container_width=True, hide_index=True)
+    
+    # Mejor algoritmo
     st.success(
         f"Algoritmo mas eficiente: {best['algorithm']} "
         f"con {best['total_distance']} cilindros recorridos."
     )
 
+    # Descargas
     col_csv, col_json = st.columns(2)
     with col_csv:
         st.download_button(
@@ -259,6 +286,7 @@ def render_individual_mode(
             mime="application/json",
         )
 
+      # Visualización
     st.subheader("Visualizacion")
     plot_option = st.selectbox(
         "Selecciona una grafica",
@@ -277,10 +305,13 @@ def render_individual_mode(
     plt.close(fig)
 
 
+# MODO ESCENARIOS
 def render_scenario_mode(selected_scenarios: List[str], compare_button: bool) -> None:
     """Renderiza resultados del modo de comparacion de escenarios."""
     scenarios = get_predefined_scenarios()
     st.subheader("Escenarios predefinidos")
+    
+    # Muestra información de escenarios
     for scenario_name in selected_scenarios:
         scenario = scenarios[scenario_name]
         st.markdown(
@@ -293,6 +324,7 @@ def render_scenario_mode(selected_scenarios: List[str], compare_button: bool) ->
         st.info("Selecciona los escenarios y presiona Comparar escenarios.")
         return
 
+     # Ejecuta comparación
     if compare_button:
         if not selected_scenarios:
             st.error("Selecciona al menos un escenario para comparar.")
@@ -305,9 +337,11 @@ def render_scenario_mode(selected_scenarios: List[str], compare_button: bool) ->
     winners = st.session_state["scenario_winners"]
     complete_rows = scenario_results_to_rows(scenario_results)
 
+    # Tabla completa
     st.subheader("Tabla completa de resultados")
     st.dataframe(complete_rows, use_container_width=True, hide_index=True)
 
+     # Ganadores
     st.subheader("Mejor algoritmo por escenario")
     st.dataframe(winners, use_container_width=True, hide_index=True)
 
@@ -329,6 +363,7 @@ def render_scenario_mode(selected_scenarios: List[str], compare_button: bool) ->
             mime="application/json",
         )
 
+    # Visualizaciones
     st.subheader("Visualizacion de escenarios")
     plot_option = st.selectbox(
         "Selecciona una visualizacion",
@@ -351,6 +386,7 @@ def render_scenario_mode(selected_scenarios: List[str], compare_button: bool) ->
     st.caption(scenario_visual_explanation(plot_option))
 
 
+# FUNCIÓN PRINCIPAL
 def main() -> None:
     """Construye y ejecuta la aplicacion Streamlit."""
     st.set_page_config(
@@ -364,6 +400,7 @@ def main() -> None:
         "por el cabezal como aproximacion del seek time."
     )
 
+     # SIDEBAR
     with st.sidebar:
         mode = st.selectbox(
             "Modo de simulacion",
@@ -371,6 +408,7 @@ def main() -> None:
             key="simulation_mode",
         )
 
+         # Reinicia resultados al cambiar modo
         if st.session_state.get("active_mode") != mode:
             st.session_state["active_mode"] = mode
             st.session_state.pop("individual_results", None)
@@ -378,6 +416,7 @@ def main() -> None:
             st.session_state.pop("scenario_winners", None)
             st.rerun()
 
+         # MODO INDIVIDUAL
         if mode == "Simulacion individual":
             st.header("Datos de entrada")
             disk_size = st.number_input(
@@ -405,6 +444,8 @@ def main() -> None:
             run_button = st.button("Ejecutar simulacion", type="primary")
             for _ in range(6):
                 st.empty()
+        
+        # MODO ESCENARIOS
         else:
             scenarios = get_predefined_scenarios()
             st.header("Escenarios")
@@ -417,6 +458,7 @@ def main() -> None:
             for _ in range(6):
                 st.empty()
 
+    # CONTENIDO PRINCIPAL
     if mode == "Simulacion individual":
         render_individual_mode(
             run_button,
@@ -429,5 +471,6 @@ def main() -> None:
         render_scenario_mode(selected_scenarios, compare_button)
 
 
+# Ejecuta la aplicación
 if __name__ == "__main__":
     main()
