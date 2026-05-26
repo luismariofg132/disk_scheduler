@@ -1,10 +1,19 @@
-"""Interfaz principal del simulador de planificacion de E/S en disco."""
+"""Interfaz principal del simulador de planificacion de E/S en disco.
+
+Este módulo permite:
+- Leer datos desde consola.
+- Ejecutar algoritmos de planificación de disco.
+- Comparar resultados.
+- Mostrar gráficas.
+- Exportar resultados a CSV y JSON.
+"""
 
 import argparse
 import ast
 import os
 from typing import List
 
+# Configura una carpeta local para la caché de matplotlib
 os.environ.setdefault(
     "MPLCONFIGDIR",
     os.path.join(os.path.dirname(__file__), ".matplotlib_cache"),
@@ -13,8 +22,13 @@ os.environ.setdefault(
 import matplotlib.pyplot as plt
 from tabulate import tabulate
 
+# Algoritmos y validaciones
 from algorithms import DiskResult, c_scan, fcfs, scan, sstf, validate_disk_input
+
+# Exportación de resultados
 from exporter import export_to_csv, export_to_json
+
+# Funciones de visualización
 from visualization import (
     plot_average_time_bars,
     plot_comparison,
@@ -22,6 +36,7 @@ from visualization import (
     plot_total_distance_bars,
 )
 
+# FUNCIONES DE ENTRADA
 
 def parse_requests(raw_value: str) -> List[int]:
     """Convierte una entrada tipo '[1, 2, 3]' o '1,2,3' en lista de enteros."""
@@ -29,11 +44,14 @@ def parse_requests(raw_value: str) -> List[int]:
     if not value:
         raise ValueError("La lista de solicitudes no puede estar vacia.")
 
+ # Permite formato tipo lista de Python    
     if value.startswith("["):
         parsed = ast.literal_eval(value)
         if not isinstance(parsed, list):
             raise ValueError("La entrada debe ser una lista de cilindros.")
         requests = parsed
+    
+     # Permite formato separado por comas
     else:
         requests = [item.strip() for item in value.split(",")]
 
@@ -87,11 +105,13 @@ def read_interactive_input() -> tuple[int, int, List[int], str]:
             print(f"Datos invalidos: {error}")
             print("Vuelve a ingresar el caso de simulacion.\n")
 
+# DATOS DE PRUEBA
 
 def example_input() -> tuple[int, int, List[int], str]:
     """Retorna los datos de prueba clasicos del problema."""
     return 200, 53, [98, 183, 37, 122, 14, 124, 65, 67], "right"
 
+# EJECUCIÓN DE ALGORITMOS
 
 def run_algorithms(
     requests: List[int],
@@ -113,7 +133,7 @@ def get_best_algorithm(results: List[DiskResult]) -> DiskResult:
     """Determina el algoritmo mas eficiente por menor distancia total."""
     return min(results, key=lambda result: result["total_distance"])
 
-
+# RESULTADOS
 def print_results_table(results: List[DiskResult]) -> None:
     """Imprime una tabla comparativa con las metricas principales."""
     table = [
@@ -154,6 +174,7 @@ def explain_best_algorithm(results: List[DiskResult]) -> None:
         "realiza menos movimiento fisico para atender las solicitudes."
     )
 
+# EXPORTACIÓN
 
 def export_results(results: List[DiskResult], export_choice: str) -> None:
     """Exporta resultados segun la opcion seleccionada."""
@@ -176,7 +197,7 @@ def ask_export_results(results: List[DiskResult]) -> None:
     export_choice = input("Deseas exportar resultados? (none/csv/json/both): ").strip().lower()
     export_results(results, export_choice)
 
-
+# GRÁFICAS
 def show_plots(results: List[DiskResult]) -> None:
     """Genera las graficas individuales y comparativas."""
     for result in results:
@@ -186,7 +207,7 @@ def show_plots(results: List[DiskResult]) -> None:
     plot_average_time_bars(results)
     plt.show()
 
-
+# ARGUMENTOS DE CONSOLA
 def build_parser() -> argparse.ArgumentParser:
     """Crea el parser de argumentos de linea de comandos."""
     parser = argparse.ArgumentParser(description="Simulador de planificacion de E/S en disco")
@@ -213,18 +234,23 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# FUNCIÓN PRINCIPAL
+
 def main() -> None:
     """Punto de entrada del programa."""
     args = build_parser().parse_args()
 
     print("Simulador de planificacion de E/S en disco")
+     # Usa datos de ejemplo o entrada manual
     if args.example:
         disk_size, head, requests, direction = example_input()
     else:
         disk_size, head, requests, direction = read_interactive_input()
 
+    # Ejecuta algoritmos
     results = run_algorithms(requests, head, disk_size, direction)
 
+    # Muestra datos de entrada
     print()
     print(f"Tamano del disco: cilindros 0 a {disk_size - 1}")
     print(f"Posicion inicial del cabezal: {head}")
@@ -232,18 +258,22 @@ def main() -> None:
     print(f"Direccion inicial para SCAN/C-SCAN: {direction}")
     print()
 
+    # Muestra resultados
     print_results_table(results)
     explain_best_algorithm(results)
     print()
 
+    # Exportación
     if args.export:
         export_results(results, args.export)
     elif not args.no_export_prompt:
         ask_export_results(results)
 
-    if not args.no_plots:
+    
+    # Gráficas
+        if not args.no_plots:
         show_plots(results)
 
-
+# Ejecuta el programa
 if __name__ == "__main__":
     main()
