@@ -37,7 +37,7 @@ def _validate_common(
         raise ValueError("La lista de solicitudes no puede estar vacia.")
 
     # Verifica que el cabezal sea válido
-        if head < 0:
+    if head < 0:
         raise ValueError("La posicion inicial del cabezal no puede ser negativa.")
 
     # Validaciones relacionadas con el disco

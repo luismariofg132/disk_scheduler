@@ -271,7 +271,7 @@ def main() -> None:
 
     
     # Gráficas
-        if not args.no_plots:
+    if not args.no_plots:
         show_plots(results)
 
 # Ejecuta el programa
