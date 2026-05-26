@@ -1,5 +1,12 @@
-"""Funciones de visualizacion para el movimiento del cabezal."""
+"""Funciones de visualizacion para el movimiento del cabezal.
+Este módulo genera gráficas para:
+- Movimiento del cabezal.
+- Comparación entre algoritmos.
+- Distancia total recorrida.
+- Tiempo promedio de acceso.
+- Comparación de escenarios."""
 
+# IMPORTACIONES
 import os
 from collections import Counter
 from typing import Iterable, List, Mapping
@@ -9,14 +16,18 @@ os.environ.setdefault(
     os.path.join(os.path.dirname(__file__), ".matplotlib_cache"),
 )
 
+# Configuración de caché de matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 from algorithms import DiskResult
 
+
+# Tipo auxiliar para métricas de escenarios
 ScenarioMetric = Mapping[str, object]
 
 
+# MOVIMIENTO INDIVIDUAL
 def plot_movement(result: DiskResult) -> Figure:
     """Grafica la secuencia de movimiento de un algoritmo y retorna la figura."""
     sequence = result["sequence"]
@@ -33,6 +44,7 @@ def plot_movement(result: DiskResult) -> Figure:
     return fig
 
 
+# COMPARACIÓN GENERAL
 def plot_comparison(results: Iterable[DiskResult]) -> Figure:
     """Muestra los cuatro algoritmos en subgraficas y retorna la figura."""
     result_list = list(results)
@@ -53,7 +65,7 @@ def plot_comparison(results: Iterable[DiskResult]) -> Figure:
     fig.tight_layout()
     return fig
 
-
+# DISTANCIA TOTAL
 def plot_total_distance_bars(results: Iterable[DiskResult]) -> Figure:
     """Grafica barras de distancia total y retorna la figura."""
     result_list = list(results)
@@ -69,7 +81,7 @@ def plot_total_distance_bars(results: Iterable[DiskResult]) -> Figure:
     fig.tight_layout()
     return fig
 
-
+# TIEMPO PROMEDIO
 def plot_average_time_bars(results: Iterable[DiskResult]) -> Figure:
     """Grafica barras de tiempo promedio de acceso y retorna la figura."""
     result_list = list(results)
@@ -86,6 +98,7 @@ def plot_average_time_bars(results: Iterable[DiskResult]) -> Figure:
     return fig
 
 
+# ESCENARIOS
 def plot_scenario_distance_comparison(scenario_results: Iterable[ScenarioMetric]) -> Figure:
     """Grafica distancia total por escenario con barras agrupadas por algoritmo."""
     return _plot_grouped_scenario_bars(
@@ -106,6 +119,7 @@ def plot_scenario_average_time_comparison(scenario_results: Iterable[ScenarioMet
     )
 
 
+# GANADORES
 def plot_algorithm_wins(winners: Iterable[Mapping[str, object]]) -> Figure:
     """Grafica cuantas veces gano cada algoritmo en los escenarios evaluados."""
     winner_list = list(winners)
@@ -124,6 +138,7 @@ def plot_algorithm_wins(winners: Iterable[Mapping[str, object]]) -> Figure:
     return fig
 
 
+# FUNCIONES AUXILIARES
 def _algorithm_names(results: List[DiskResult]) -> List[str]:
     """Extrae los nombres de algoritmos para las graficas comparativas."""
     return [result["algorithm"] for result in results]
@@ -146,6 +161,7 @@ def _plot_grouped_scenario_bars(
 
     fig, axis = plt.subplots(figsize=(12, 6))
 
+    # Crea barras para cada algoritmo
     for algorithm, offset, color in zip(algorithms, offsets, colors):
         values = [
             _metric_for(result_list, scenario, algorithm, metric_key)
