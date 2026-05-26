@@ -5,9 +5,10 @@ entre cilindros. Cada algoritmo retorna la secuencia completa de movimiento,
 incluyendo la posicion inicial del cabezal.
 """
 
+# IMPORTACIONES
 from typing import Iterable, List, Optional, TypedDict
 
-
+# ESTRUCTURA DE RESULTADOS
 class DiskResult(TypedDict):
     """Resultado estandar que retorna cada algoritmo."""
 
@@ -16,7 +17,7 @@ class DiskResult(TypedDict):
     total_distance: int
     average_access_time: float
 
-
+# FUNCIONES AUXILIARES
 def _normalize_requests(requests: Iterable[int]) -> List[int]:
     """Convierte las solicitudes a lista para validarlas y reutilizarlas."""
     return list(requests)
@@ -31,18 +32,22 @@ def _validate_common(
     """Valida entradas compartidas por los algoritmos."""
     normalized_requests = _normalize_requests(requests)
 
+    # Verifica que existan solicitudes
     if not normalized_requests:
         raise ValueError("La lista de solicitudes no puede estar vacia.")
 
-    if head < 0:
+    # Verifica que el cabezal sea válido
+        if head < 0:
         raise ValueError("La posicion inicial del cabezal no puede ser negativa.")
 
+    # Validaciones relacionadas con el disco
     if disk_size is not None:
         if disk_size <= 0:
             raise ValueError("El tamano del disco debe ser mayor que cero.")
         if head >= disk_size:
             raise ValueError("La posicion inicial del cabezal esta fuera del rango del disco.")
 
+    # Verifica solicitudes válidas
     for request in normalized_requests:
         if request < 0:
             raise ValueError("No se aceptan cilindros negativos.")
@@ -82,6 +87,7 @@ def _build_result(algorithm: str, sequence: List[int], request_count: int) -> Di
     }
 
 
+# ALGORITMO FCFS
 def fcfs(requests: Iterable[int], head: int) -> DiskResult:
     """First-Come, First-Served: atiende las solicitudes en orden de llegada."""
     validated_requests = _validate_common(requests, head)
@@ -89,12 +95,14 @@ def fcfs(requests: Iterable[int], head: int) -> DiskResult:
     return _build_result("FCFS", sequence, len(validated_requests))
 
 
+# ALGORITMO SSTF
 def sstf(requests: Iterable[int], head: int) -> DiskResult:
     """Shortest Seek Time First: siempre elige la solicitud mas cercana."""
     pending = _validate_common(requests, head)
     current = head
     sequence = [head]
 
+    # Encuentra la solicitud más cercana
     while pending:
         nearest = min(pending, key=lambda request: abs(request - current))
         sequence.append(nearest)
@@ -104,19 +112,27 @@ def sstf(requests: Iterable[int], head: int) -> DiskResult:
     return _build_result("SSTF", sequence, len(sequence) - 1)
 
 
+# ALGORITMO SCAN
 def scan(requests: Iterable[int], head: int, disk_size: int, direction: str) -> DiskResult:
     """SCAN: mueve el cabezal como un ascensor hasta el extremo y luego regresa."""
     validated_requests = _validate_common(requests, head, disk_size, direction)
     max_cylinder = disk_size - 1
+    
+    # Solicitudes menores al cabezal
     left = sorted(request for request in validated_requests if request < head)
+    
+    # Solicitudes mayores o iguales
     right = sorted(request for request in validated_requests if request >= head)
     sequence = [head]
 
+     # Movimiento hacia la derecha
     if direction == "right":
         sequence.extend(right)
         if sequence[-1] != max_cylinder:
             sequence.append(max_cylinder)
         sequence.extend(reversed(left))
+    
+    # Movimiento hacia la izquierda
     else:
         sequence.extend(reversed(left))
         if sequence[-1] != 0:
@@ -126,6 +142,7 @@ def scan(requests: Iterable[int], head: int, disk_size: int, direction: str) -> 
     return _build_result("SCAN", sequence, len(validated_requests))
 
 
+# ALGORITMO C-SCAN
 def c_scan(requests: Iterable[int], head: int, disk_size: int, direction: str) -> DiskResult:
     """C-SCAN: avanza en una sola direccion y salta al extremo opuesto."""
     validated_requests = _validate_common(requests, head, disk_size, direction)
@@ -134,6 +151,7 @@ def c_scan(requests: Iterable[int], head: int, disk_size: int, direction: str) -
     right = sorted(request for request in validated_requests if request >= head)
     sequence = [head]
 
+    # Movimiento hacia la derecha
     if direction == "right":
         sequence.extend(right)
         if sequence[-1] != max_cylinder:
@@ -141,6 +159,8 @@ def c_scan(requests: Iterable[int], head: int, disk_size: int, direction: str) -
         if left:
             sequence.append(0)
             sequence.extend(left)
+    
+    # Movimiento hacia la izquierda
     else:
         sequence.extend(reversed(left))
         if sequence[-1] != 0:
